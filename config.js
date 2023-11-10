@@ -19,6 +19,12 @@ global.multiplier = 69
 global.wait = '*tunggu....*'
 global.eror = '*Erorr!!* please try again later'
 global.me = '*Simple bot WhatsApp*'
+global.bott = 'Erza V Beta'
+
+// itel
+global.str = '-------------'
+global.l = '「'
+global.r = '」'
 
 global.rpg = {
   emoticon(string) {
