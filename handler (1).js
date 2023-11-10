@@ -143,15 +143,15 @@ export async function handler(chatUpdate) {
         const isAdmin = isRAdmin || user?.admin == 'admin' || false // Is User Admin?
         const isBotAdmin = bot?.admin || false // Are you Admin?
         
-        const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), './plugins')
-        for (let name in global.plugins) {
-            let plugin = global.plugins[name]
-            if (!plugin) continue
-            if (plugin.disabled) continue
+        const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), './menu')
+        for (let name in global.menu) {
+            let menus = global.menu[name]
+            if (!menus) continue
+            if (menus.disabled) continue
             const __filename = join(___dirname, name)
-            if (typeof plugin.all === 'function') {
+            if (typeof menus.all === 'function') {
                 try {
-                    await plugin.all.call(this, m, {
+                    await menus.all.call(this, m, {
                         chatUpdate,
                         __dirname: ___dirname,
                         __filename
@@ -161,20 +161,20 @@ export async function handler(chatUpdate) {
                     console.error(e)
                     for (let [jid] of global.owner.filter(([number, _, isDeveloper]) => isDeveloper && number)) {
                         let data = (await conn.onWhatsApp(jid))[0] || {}
-                        if (data.exists) m.reply(`*Plugin:* ${name}\n*Sender:* wa.me/${m.sender.split`@`[0]}\n*Chat:* ${m.chat}\n*Command:* ${m.text}\n\n\`\`\`${format(e)}\`\`\``.trim(), data.jid)
+                        if (data.exists) m.reply(`*menus:* ${name}\n*Sender:* wa.me/${m.sender.split`@`[0]}\n*Chat:* ${m.chat}\n*Command:* ${m.text}\n\n\`\`\`${format(e)}\`\`\``.trim(), data.jid)
                     }
                 }
             }
             
             if (!opts['restrict']) {
-                if (plugin.tags && plugin.tags.includes('admin')) {
+                if (menus.tags && menus.tags.includes('admin')) {
                     // global.dfail('restrict', m, this)
                     continue
                 }
             }
             
             const str2Regex = str => str.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
-            let _prefix = plugin.customPrefix ? plugin.customPrefix : conn.prefix ? conn.prefix : global.prefix
+            let _prefix = menus.customPrefix ? menus.customPrefix : conn.prefix ? conn.prefix : global.prefix
             let match = (_prefix instanceof RegExp ? // RegExp Mode?
                 [[_prefix.exec(m.text), _prefix]] : Array.isArray(_prefix) ? // Array?
                     _prefix.map(p => {
@@ -184,8 +184,8 @@ export async function handler(chatUpdate) {
                     }) : typeof _prefix === 'string' ? // String?
                 [[new RegExp(str2Regex(_prefix)).exec(m.text), new RegExp(str2Regex(_prefix))]] : [[[], new RegExp]]
             ).find(p => p[1])
-            if (typeof plugin.before === 'function')
-                if (await plugin.before.call(this, m, {
+            if (typeof menus.before === 'function')
+                if (await menus.before.call(this, m, {
                     match,
                     conn: this,
                     participants,
@@ -202,7 +202,7 @@ export async function handler(chatUpdate) {
                     __dirname: ___dirname,
                     __filename
                 })) continue
-            if (typeof plugin !== 'function') continue
+            if (typeof menus !== 'function') continue
             if ((usedPrefix = (match[0] || '')[0])) {
                 let noPrefix = m.text.replace(usedPrefix, '')
                 let [command, ...args] = noPrefix.trim().split` `.filter(v => v)
@@ -210,65 +210,65 @@ export async function handler(chatUpdate) {
                 let _args = noPrefix.trim().split` `.slice(1)
                 let text = _args.join` `
                 command = (command || '').toLowerCase()
-                let fail = plugin.fail || global.dfail // When failed
-                let isAccept = plugin.command instanceof RegExp ? // RegExp Mode?
-                    plugin.command.test(command) : Array.isArray(plugin.command) ? // Array?
-                        plugin.command.some(cmd => cmd instanceof RegExp ? // RegExp in Array?
-                    cmd.test(command) : cmd === command) : typeof plugin.command === 'string' ? // String?
-                plugin.command === command : false
+                let fail = menus.fail || global.dfail // When failed
+                let isAccept = menus.command instanceof RegExp ? // RegExp Mode?
+                    menus.command.test(command) : Array.isArray(menus.command) ? // Array?
+                        menus.command.some(cmd => cmd instanceof RegExp ? // RegExp in Array?
+                    cmd.test(command) : cmd === command) : typeof menus.command === 'string' ? // String?
+                menus.command === command : false
                 
                 if (!isAccept) continue
-                m.plugin = name
+                m.menus = name
                 if (m.chat in global.db.data.chats || m.sender in global.db.data.users) {
                     let chat = global.db.data.chats[m.chat]
                     let user = global.db.data.users[m.sender]
                     if (name != 'group-mute.js' && chat?.isBanned) return // Except this
                     if (name != 'owner-unbanuser.js' && user?.banned) return
                 }
-                if (plugin.rowner && plugin.owner && !(isROwner || isOwner)) { // Both Owner
+                if (menus.rowner && menus.owner && !(isROwner || isOwner)) { // Both Owner
                     // fail('owner', m, this)
                     continue
                 }
-                if (plugin.rowner && !isROwner) { // Real Owner
+                if (menus.rowner && !isROwner) { // Real Owner
                     // fail('rowner', m, this)
                     continue                    
                 }
-                if (plugin.owner && !isOwner) { // Number Owner
+                if (menus.owner && !isOwner) { // Number Owner
                     // fail('owner', m, this)
                     continue
                 }
-                if (plugin.mods && !isMods) { // Moderator
+                if (menus.mods && !isMods) { // Moderator
                     fail('mods', m, this)
                     continue
                 }
-                if (plugin.premium && !isPrems) { // Premium
+                if (menus.premium && !isPrems) { // Premium
                     fail('premium', m, this)
                     continue
                 }
-                if (plugin.group && !m.isGroup) { // Group Only
+                if (menus.group && !m.isGroup) { // Group Only
                     fail('group', m, this)
                     continue
-                } else if (plugin.botAdmin && !isBotAdmin) { // You Admin
+                } else if (menus.botAdmin && !isBotAdmin) { // You Admin
                     fail('botAdmin', m, this)
                     continue
-                } else if (plugin.admin && !isAdmin) { // User Admin
+                } else if (menus.admin && !isAdmin) { // User Admin
                     fail('admin', m, this)
                     continue
                 }
-                if (plugin.private && m.isGroup) { // Private Chat Only
+                if (menus.private && m.isGroup) { // Private Chat Only
                     fail('private', m, this)
                     continue
                 }
-                if (plugin.register == true && _user.registered == false) { // Butuh daftar?
+                if (menus.register == true && _user.registered == false) { // Butuh daftar?
                     fail('unreg', m, this)
                     continue
                 }
                 m.isCommand = true
-                let xp = 'exp' in plugin ? parseInt(plugin.exp) : 17 // XP Earning per command
+                let xp = 'exp' in menus ? parseInt(menus.exp) : 17 // XP Earning per command
                 // if (xp > 200) m.reply('Ngecit -_-') // Hehehe
                 // else m.exp += xp
                 if (xp) m.exp += xp
-                if (!isPrems && plugin.limit && global.db.data.users[m.sender].limit < plugin.limit * 1) {
+                if (!isPrems && menus.limit && global.db.data.users[m.sender].limit < menus.limit * 1) {
                     this.reply(m.chat, `Limit you run out`, m)
                     continue // Limit habis
                 }
@@ -296,8 +296,8 @@ export async function handler(chatUpdate) {
                     __filename
                 }
                 try {
-                    await plugin.call(this, m, extra)
-                    if (!isPrems) m.limit = m.limit || plugin.limit || false
+                    await menus.call(this, m, extra)
+                    if (!isPrems) m.limit = m.limit || menus.limit || false
                 } catch (e) {
                     // Error occured
                     m.error = e
@@ -308,16 +308,16 @@ export async function handler(chatUpdate) {
                         if (e.name) {
                             for (let [jid] of global.owner.filter(([number, _, isDeveloper]) => isDeveloper && number)) {
                                 let data = (await conn.onWhatsApp(jid))[0] || {}
-                                if (data.exists) m.reply(`*Plugin:* ${m.plugin}\n*Sender:* wa.me/${m.sender.split`@`[0]}\n*Chat:* ${m.chat}\n*Command:* ${usedPrefix}${command} ${args.join(' ')}\n\n\`\`\`${text}\`\`\``.trim(), data.jid)
+                                if (data.exists) m.reply(`*menus:* ${m.menus}\n*Sender:* wa.me/${m.sender.split`@`[0]}\n*Chat:* ${m.chat}\n*Command:* ${usedPrefix}${command} ${args.join(' ')}\n\n\`\`\`${text}\`\`\``.trim(), data.jid)
                             }
                         }
                         m.reply(String(e))
                     }
                 } finally {
                     // m.reply(util.format(_user))
-                    if (typeof plugin.after === 'function') {
+                    if (typeof menus.after === 'function') {
                         try {
-                            await plugin.after.call(this, m, extra)
+                            await menus.after.call(this, m, extra)
                         } catch (e) {
                             console.error(e)
                         }
@@ -343,15 +343,15 @@ export async function handler(chatUpdate) {
                 user.limit -= m.limit * 1
             }
             let stat
-            if (m.plugin) {
+            if (m.menus) {
                 let now = +new Date
-                if (m.plugin in stats) {
-                    stat = stats[m.plugin]
+                if (m.menus in stats) {
+                    stat = stats[m.menus]
                     if (!isNumber(stat.total)) stat.total = 1
                     if (!isNumber(stat.success)) stat.success = m.error != null ? 0 : 1
                     if (!isNumber(stat.last)) stat.last = now
                     if (!isNumber(stat.lastSuccess)) stat.lastSuccess = m.error != null ? 0 : now
-                } else stat = stats[m.plugin] = {
+                } else stat = stats[m.menus] = {
                     total: 1,
                     success: m.error != null ? 0 : 1,
                     last: now,
@@ -415,7 +415,7 @@ text: text,
 contextInfo: {
 mentionedJid: [user],
 externalAdReply: {
-title: "© Zoro MD",
+title: "© Rey",
 body: "Group Notifications",
 thumbnailUrl: pp,
 sourceUrl: 'https://whatsapp.com/channel/0029Va4gIsn3WHTcFh97VU3s',
