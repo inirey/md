@@ -1,5 +1,5 @@
 {
-    "name": "zoromd",
+    "name": "erz-MD",
     "version": "4.8.0",
     "description": "Simple WhatsApp Bot MD With ESM Module",
     "main": "index.js",
@@ -7,7 +7,7 @@
     "directories": {
         "lib": "lib",
         "src": "src",
-        "plugins": "plugins"
+        "menu": "menu"
     },
     "scripts": {
         "start": "node index.js",
@@ -16,14 +16,11 @@
     },
     "keywords": [
         "termux-whatsapp-bot",
-        "zoromd",
-        "zoro-md",
         "whatsapp-bot",
         "whatsapp",
         "wa-md",
         "js-whatsapp",
         "whatsapp-js",
-        "lua-Bot",
         "whatsapp",
         "Games-wabot",
         "wabot-aq",
@@ -33,14 +30,14 @@
     ],
     "homepage": "https://github.com/xxirfanx/zoromd",
     "author": {
-        "name": "LUA SER OFC"
+    "name": "Rey"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/xxirfanx/zoromd.git"
+        "url": "git+https://github.com/inirey/md.git"
     },
     "bugs": {
-        "url": "https://github.com/xxirfanx/zoromd/issues"
+        "url": "https://github.com/inirey/md/issues"
     },
     "license": "GPL-3.0-or-later",
     "dependencies": {
@@ -49,12 +46,10 @@
         "@bochilteam/scraper-sosmed": "^1.0.5",
         "@vitalets/google-translate-api": "^9.2.0",
         "acrcloud": "^1.4.0",
-        "api-dylux": "^1.6.9",
         "awesome-phonenumber": "^5.10.0",
         "axios": "^1.4.0",
-        "booru": "^2.6.3",
+        "skh-api": "^2.0.0",
         "brainly-scraper-v2": "^2.0.9",
-        "caliph-api": "^1.0.0",
         "cfonts": "^3.2.0",
         "chalk": "^5.3.0",
         "cheerio": "^1.0.0-rc.12",
@@ -84,7 +79,6 @@
         "qrcode": "^1.5.3",
         "qrcode-terminal": "*",
         "readline": "^1.3.0",
-        "sagiri": "^3.4.0",
         "similarity": "^1.2.1",
         "syntax-error": "^1.4.0",
         "terminal-image": "^2.0.0",
